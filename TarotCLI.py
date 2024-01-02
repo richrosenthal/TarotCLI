@@ -1,10 +1,16 @@
+import os
 import random
-import openai
+from openai import OpenAI  # Updated import statement
 from argparse import ArgumentParser
 
+# Create an OpenAI client with the API key
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+if not client.api_key:
+    raise ValueError("The OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable.")
+
 def get_tarot_reading(question):
-    tarot_cards = [
-        "The Fool", "The Magician", "The High Priestess", "The Empress", "The Emperor",
+    # List of tarot cards
+    tarot_cards = ["The Fool", "The Magician", "The High Priestess", "The Empress", "The Emperor",
         "The Hierophant", "The Lovers", "The Chariot", "Strength", "The Hermit",
         "Wheel of Fortune", "Justice", "The Hanged Man", "Death", "Temperance",
         "The Devil", "The Tower", "The Star", "The Moon", "The Sun",
@@ -20,23 +26,20 @@ def get_tarot_reading(question):
         "Page of Swords", "Knight of Swords", "Queen of Swords", "King of Swords",
         "Ace of Pentacles", "Two of Pentacles", "Three of Pentacles", "Four of Pentacles", "Five of Pentacles",
         "Six of Pentacles", "Seven of Pentacles", "Eight of Pentacles", "Nine of Pentacles", "Ten of Pentacles",
-        "Page of Pentacles", "Knight of Pentacles", "Queen of Pentacles", "King of Pentacles"
-    ]
-    
-    
-     # Complete list of tarot cards
+        "Page of Pentacles", "Knight of Pentacles", "Queen of Pentacles", "King of Pentacles"1]  # Complete this list
     selected_cards = random.sample(tarot_cards, 3)
 
-    prompt = f"Hello! I am Psychic Charlotte. You asked: '{question}'. The cards drawn are: {', '.join(selected_cards)}. What do these cards mean in relation to the question?"
+    # Creating a prompt for the OpenAI API
+    prompt = f"Psychic Charlotte, using tarot cards, what does the future hold in regard to this question: '{question}'? The cards drawn are: {', '.join(selected_cards)}."
 
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # or the latest available model
-        messages=[{"role": "system", "content": "You are a tarot card reader."}, 
-                  {"role": "user", "content": prompt}]
+    # Sending a request to OpenAI using the client
+    response = client.completions.create(
+        model="text-davinci-003",  # Or the latest model you prefer
+        prompt=prompt,
+        max_tokens=150
     )
-    
-    return selected_cards, response.choices[0].message['content']
+
+    return selected_cards, response.choices[0].text
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Tarot Reading App")
